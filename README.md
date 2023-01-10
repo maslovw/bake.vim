@@ -7,12 +7,12 @@ Fork from https://github.com/flxo/bake.vim
 Bake.vim will add:
 * Project.meta syntax style
 * Bake command
-* * plugin overwrites makeprg = bake
-* * parses parameters:
-* * * -m
-* * * -b (will call bake --list on the specified project),
-* * * -p (shows list of sub-projects),
-* * * -f
+    * plugin overwrites makeprg = bake
+    * parses parameters:
+        * -m
+        * -b (will call bake --list on the specified project),
+        * -p (shows list of sub-projects),
+        * -f
 * BakeHistory to navigate quickly through Bake commands that were used previously (uses FZF to render list)
 * BakeProjects to find all Project.meta in the repository (uses FZF to render list)
 
@@ -26,7 +26,7 @@ nmap <F8> <plug>(BakeBuildThis)     " if you open Project.meta a set cursor on a
 let g:bake_custom_args = "--time -O -r -j16 --abs-paths-out --compilation-db"  
 ```
 
-<img src="https://raw.githubusercontent.com/maslovw/files/main/bake.vim.demo.gif" width=640>
+<img src="https://raw.githubusercontent.com/maslovw/files/main/bake.vim.demo.gif" width=800>
 
 ## Installation 
 
