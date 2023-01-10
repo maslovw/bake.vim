@@ -7,8 +7,7 @@
 " * Plug 'junegunn/fzf.vim' 
 " * Plug 'tpope/vim-dispatch'
 "
-" s:bake_make_cmd contains executable command (:make or :Make)
-" s:bake_args contains latest bake arguments (automatically reassigned)
+" g:bake_make_cmd contains executable command (:make or :Make)
 " g:bake_custom_args: additional arguments for bake that will always concatenate with Bake command
 " let s:bake_current_project = " "
 """
@@ -17,15 +16,15 @@ if exists('g:loaded_bake')
 endif
 let g:loaded_bake = 1
 
-let g:bake_custom_args = ""
-let g:bake_cmd_buffer_size = 10
+let g:bake_custom_args = get(g:, 'bake_custom_args', "")
+let g:bake_cmd_buffer_size = get(g:, 'bake_cmd_buffer_size', 10)
 "
 " Detect if Dispatch plugin installed to use :Make
 autocmd VimEnter *
             \  if exists(':Make')
-            \|     let g:bake_make_cmd = "Make "
+            \|     let g:bake_make_cmd = get(g:, 'bake_make_cmd', "Make ")
             \| else
-            \|     let g:bake_make_cmd = "make "
+            \|     let g:bake_make_cmd = get(g:, 'bake_make_cmd', "make ")
             \| endif
 
 let g:bake_arguments = ['-m', '-b',
