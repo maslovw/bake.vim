@@ -129,9 +129,11 @@ endfun
 
 fun! s:list_of_files(path, expr)
     if executable('rg')
-        return split(system("rg --files --no-ignore-vcs -g ".a:expr))
+        return split(system('rg --files --no-ignore-vcs -g "'.a:expr.'"'))
+    elseif executable('git')
+        return split(system('git ls-files "**/'.a:expr.'"'))
     else
-        return globpath(a:path, a:expr, 0,1)
+        return globpath(a:path, "**/".a:expr, 0,1)
     endif
 endfun
 
@@ -139,7 +141,7 @@ endfun
 fun! bake#get_list_of_projects(path)
     let key = fnamemodify(a:path, ':p')
     if !has_key(s:list_of_projects, key) 
-        let list_of_files = s:list_of_files(a:path, "**/Project.meta")
+        let list_of_files = s:list_of_files(a:path, "Project.meta")
         let s:list_of_projects_paths[key] = copy(list_of_files)
         let s:list_of_projects[key] = map(list_of_files, "lh#path#split(v:val)[-2]")
     endif
@@ -159,13 +161,13 @@ fun bake#list_arguments(ArgLead, CmdLine, CursorPos)
     if 1 == pos
         let res = filter(params, "v:val !~ '" . ignore_patterns . "'") 
     elseif tokens[pos-1] ==  "-b" 
-        let res = system('bake -m ' . s:getModule(a:CmdLine) . ' --list \| grep \*')
+        let res = system('bake -m ' . s:getModule(a:CmdLine) . ' --list | grep "*"')
         let res = substitute(res, '\*', '', '')
         let res = substitute(res, '(.*)', '', '')
         let res = filter(split(res), 'v:val != "*"') 
 
     elseif (tokens[pos-2] ==  "-b" && lead_char != " ") 
-        let res = system('bake -m ' . s:getModule(a:CmdLine) . ' --list \| grep \*')
+        let res = system('bake -m ' . s:getModule(a:CmdLine) . ' --list | grep *')
         let res = substitute(res, '\*', '', '')
         let res = substitute(res, '(.*)', '', '')
         let res = filter(split(res), 'v:val =~ "' . tokens[pos-1] . '"') 
@@ -224,7 +226,7 @@ endfunction
 
 function! bake#show_project_targets() abort
     call s:bake_find_current_project_meta()
-    call fzf#run(fzf#wrap({'source': 'bake -m ' . g:bake_cur_prj . ' --list \| grep \*', 'sink': function('<SID>bake_set_project_target')})) 
+    call fzf#run(fzf#wrap({'source': 'bake -m ' . g:bake_cur_prj . ' --list | grep -e "\*"', 'sink': function('<SID>bake_set_project_target')})) 
 endfunction
 
 
