@@ -5,15 +5,15 @@ if !exists('*lh#path#join()')
     finish
 endif
 
-let s:config_name = lh#path#join([expand('<sfile>:p:h:h'), "bake_cfg", "last_cmd.txt"])
 let s:ProjectTarget = ""
 let s:list_of_projects = {}
 let s:list_of_projects_paths = {}
-let s:bake_cmd_buffer = []
+let s:bake_cmd_buffer = {}
 
 
 fun! bake#get_cmd_buffer() abort
-    return s:bake_cmd_buffer
+    let key = getcwd()
+    return get(s:bake_cmd_buffer, key, [])
 endfun
 
 fun! s:bake_find_current_project_meta() abort
@@ -77,15 +77,27 @@ fun! bake#build_last() abort
     return ':'.cmd
 endfun
 
-fun! s:Bake_load_hist()
+fun! s:Bake_load_hist() abort
 
-    if filereadable(s:config_name)
-        let s:bake_cmd_buffer = readfile(s:config_name)
+    if filereadable(g:bake_config_path)
+        "deserialize
+        let buff = readfile(g:bake_config_path)[0]
+        execute "let s:bake_cmd_buffer = ".buff
 
-        let s:bake_args = get(s:bake_cmd_buffer,0, "")
+        let s:bake_cmd_buffer[getcwd()] = get(s:bake_cmd_buffer, getcwd(), [])
+
+        let s:bake_args = get(s:bake_cmd_buffer[getcwd()],0, "")
         let s:bake_args = substitute(s:bake_args, "Bake ", "","")
     else
-        call mkdir(lh#path#join(lh#path#split(s:config_name)[:-2]), 'p')
+        let s:bake_cmd_buffer = {getcwd(): []}
+        call mkdir(lh#path#join(lh#path#split(g:bake_config_path)[:-2]), 'p')
+        call s:Bake_write_hist()
+    endif
+endfun
+
+fun! s:Bake_write_hist() abort
+    if writefile([string(s:bake_cmd_buffer)], g:bake_config_path)
+        echoerr 'Bake: write ' . g:bake_config_path . ' error'
     endif
 endfun
 
@@ -93,12 +105,10 @@ fun! s:Bake_add_hist(bake_cmd)
     let bake_cmd_e = escape(copy(a:bake_cmd), '\')
 
     " remove current command from the list 
-    let s:bake_cmd_buffer = filter(s:bake_cmd_buffer, 'v:val != "'.bake_cmd_e.'"')
+    let s:bake_cmd_buffer[getcwd()] = filter(s:bake_cmd_buffer[getcwd()], 'v:val != "'.bake_cmd_e.'"')
     " paste current command to the biginning of the list
-    let s:bake_cmd_buffer = [a:bake_cmd] + s:bake_cmd_buffer[:g:bake_cmd_buffer_size]
-    if writefile(s:bake_cmd_buffer, s:config_name)
-        echoerr 'Bake: write ' . s:config_name . ' error'
-    endif
+    let s:bake_cmd_buffer[getcwd()] = [a:bake_cmd] + s:bake_cmd_buffer[getcwd()][:g:bake_cmd_buffer_size]
+    call s:Bake_write_hist()
 
 endfun
 

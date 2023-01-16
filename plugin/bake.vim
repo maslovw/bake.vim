@@ -16,9 +16,16 @@ if exists('g:loaded_bake')
 endif
 let g:loaded_bake = 1
 
+" custom bake arguments that would be concatenated to every Bake command whene executed
 let g:bake_custom_args = get(g:, 'bake_custom_args', "")
+
+" bake history command buffer size (count of elements, by deafault: 10)
 let g:bake_cmd_buffer_size = get(g:, 'bake_cmd_buffer_size', 10)
-"
+
+" path where bake history commands is stored
+let s:bake_default_config_path = lh#path#join([expand('<sfile>:p:h:h'), "bake_cfg", "last_cmd.txt"])
+let g:bake_config_path = get(g:, 'bake_config_path', s:bake_default_config_path)
+
 " Detect if Dispatch plugin installed to use :Make
 autocmd VimEnter *
             \  if exists(':Make')
