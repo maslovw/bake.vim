@@ -239,6 +239,10 @@ function! bake#show_project_targets() abort
     call fzf#run(fzf#wrap({'source': 'bake -m ' . g:bake_cur_prj . ' --list | grep -e "\*"', 'sink': function('<SID>bake_set_project_target')})) 
 endfunction
 
+function! bake#get_current_project_meta()abort
+    return s:bake_find_current_project_meta() 
+endfunction
 
 " load command history with first load of the script
 call s:Bake_load_hist()
+
