@@ -84,7 +84,7 @@ fun! s:Bake_load_hist() abort
         let buff = readfile(g:bake_config_path)[0]
         execute "let s:bake_cmd_buffer = ".buff
 
-        let s:bake_cmd_buffer[getcwd()] = get(s:bake_cmd_buffer, getcwd(), [])
+        let s:bake_cmd_buffer[getcwd()] = bake#get_cmd_buffer()
 
         let s:bake_args = get(s:bake_cmd_buffer[getcwd()],0, "")
         let s:bake_args = substitute(s:bake_args, "Bake ", "","")
@@ -105,9 +105,9 @@ fun! s:Bake_add_hist(bake_cmd)
     let bake_cmd_e = escape(copy(a:bake_cmd), '\')
 
     " remove current command from the list 
-    let s:bake_cmd_buffer[getcwd()] = filter(s:bake_cmd_buffer[getcwd()], 'v:val != "'.bake_cmd_e.'"')
+    let s:bake_cmd_buffer[getcwd()] = filter(bake#get_cmd_buffer(), 'v:val != "'.bake_cmd_e.'"')
     " paste current command to the biginning of the list
-    let s:bake_cmd_buffer[getcwd()] = [a:bake_cmd] + s:bake_cmd_buffer[getcwd()][:g:bake_cmd_buffer_size]
+    let s:bake_cmd_buffer[getcwd()] = [a:bake_cmd] + bake#get_cmd_buffer[:g:bake_cmd_buffer_size]
     call s:Bake_write_hist()
 
 endfun
