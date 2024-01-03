@@ -10,9 +10,13 @@ let s:list_of_projects = {}
 let s:list_of_projects_paths = {}
 let s:bake_cmd_buffer = {}
 
+fun bake#get_cmd_key()
+    return getcwd()
+endfun
 
-fun! bake#get_cmd_buffer() abort
-    let key = getcwd()
+
+fun! bake#get_cmd_buffer() 
+    let key = bake#get_cmd_key()
     return get(s:bake_cmd_buffer, key, [])
 endfun
 
@@ -84,12 +88,12 @@ fun! s:Bake_load_hist() abort
         let buff = readfile(g:bake_config_path)[0]
         execute "let s:bake_cmd_buffer = ".buff
 
-        let s:bake_cmd_buffer[getcwd()] = bake#get_cmd_buffer()
+        let s:bake_cmd_buffer[bake#get_cmd_key()] = bake#get_cmd_buffer()
 
-        let s:bake_args = get(s:bake_cmd_buffer[getcwd()],0, "")
+        let s:bake_args = get(s:bake_cmd_buffer[bake#get_cmd_key()],0, "")
         let s:bake_args = substitute(s:bake_args, "Bake ", "","")
     else
-        let s:bake_cmd_buffer = {getcwd(): []}
+        let s:bake_cmd_buffer = {bake#get_cmd_key(): []}
         call mkdir(lh#path#join(lh#path#split(g:bake_config_path)[:-2]), 'p')
         call s:Bake_write_hist()
     endif
@@ -105,9 +109,9 @@ fun! s:Bake_add_hist(bake_cmd)
     let bake_cmd_e = escape(copy(a:bake_cmd), '\')
 
     " remove current command from the list 
-    let s:bake_cmd_buffer[getcwd()] = filter(bake#get_cmd_buffer(), 'v:val != "'.bake_cmd_e.'"')
+    let s:bake_cmd_buffer[bake#get_cmd_key()] = filter(bake#get_cmd_buffer(), 'v:val != "'.bake_cmd_e.'"')
     " paste current command to the biginning of the list
-    let s:bake_cmd_buffer[getcwd()] = [a:bake_cmd] + bake#get_cmd_buffer[:g:bake_cmd_buffer_size]
+    let s:bake_cmd_buffer[bake#get_cmd_key()] = [a:bake_cmd] + bake#get_cmd_buffer()[:g:bake_cmd_buffer_size]
     call s:Bake_write_hist()
 
 endfun
